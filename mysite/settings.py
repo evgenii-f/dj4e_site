@@ -101,18 +101,36 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 #     }
 # }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'ClaudiusH$ads',
+#         'USER': 'ClaudiusH',
+#         'PASSWORD': 'CLAUS_kaktus',
+#         # 'HOST': 'ClaudiusH.mysql.pythonanywhere-services.com',
+#         'HOST': 'localhost',
+#         'OPTIONS': {
+#             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+#         }
+#     }
+# }
+
+# CREATE DATABASE dj4e$ads;
+# CREATE USER 'localuser'@'localhost' IDENTIFIED BY 'localpsw';
+# GRANT ALL PRIVILEGES ON dj4e$ads.* TO 'localuser'@'localhost';
+# FLUSH PRIVILEGES;
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ClaudiusH$ads',
-        'USER': 'ClaudiusH',
-        'PASSWORD': 'CLAUS_kaktus',
-        'HOST': 'ClaudiusH.mysql.pythonanywhere-services.com',
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        }
+        'ENGINE': 'django.db.backends.mysql', 
+        'NAME': 'dj4e$ads',
+        'USER': 'localuser',
+        'PASSWORD': 'localpsw',
+        'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
+        'PORT': '3306',
     }
 }
+
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
