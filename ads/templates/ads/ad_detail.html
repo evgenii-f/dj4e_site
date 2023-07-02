@@ -35,11 +35,21 @@
 
 <h1>{{ ad.title }}</h1>
 <p>
-{{ ad.text }}
+  {{ ad.text }}
 </p>
+
 <p>
-Price: ${{ ad.price }}                                                                                                                                        
+  Price: ${{ ad.price }}                                                                                                                                        
 </p>
+
+{% if forum.tags.all %}
+  <p>Tags: 
+    {% for tag in ad.tags.all %}
+    <span style="border:1px grey solid; background-color: LightGreen;">{{ tag }}</span>
+    {% endfor %}
+  </p>
+{% endif %}
+
 <p>
 <a href="{% url 'ads:all' %}">All ads</a>
 </p>

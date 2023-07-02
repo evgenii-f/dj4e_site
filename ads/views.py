@@ -7,9 +7,10 @@ from django.urls import reverse_lazy
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect
+from django.db.models import Q
+from django.contrib.humanize.templatetags.humanize import naturaltime
 
 from pics.forms import CreateForm, CommentForm
-
 
 class AdListView(OwnerListView):
     model = Ad
@@ -18,14 +19,24 @@ class AdListView(OwnerListView):
     template_name = "ads/ad_list.html"
 
     def get(self, request) :
-        ad_list = Ad.objects.all()
+        strval =  request.GET.get("search", False)
+        if strval :
+            query = Q(title__icontains=strval) 
+            query.add(Q(text__icontains=strval), Q.OR)
+            ad_list = Ad.objects.filter(query).select_related().order_by('-updated_at')[:10]
+        else:
+            ad_list = Ad.objects.all()
+        for ad in ad_list:
+            ad.natural_updated = naturaltime(ad.updated_at)
+            
         favorites = list()
         if request.user.is_authenticated:
             # rows = [{'id': 2}, {'id': 4} ... ]  (A list of rows)
             rows = request.user.favorite_ads.values('id')
             # favorites = [2, 4, ...] using list comprehension
             favorites = [ row['id'] for row in rows ]
-        ctx = {'ad_list' : ad_list, 'favorites': favorites}
+            
+        ctx = {'ad_list' : ad_list, 'favorites': favorites, 'search': strval}
         return render(request, self.template_name, ctx)
 
 class AdDetailView(OwnerDetailView):
@@ -39,6 +50,7 @@ class AdDetailView(OwnerDetailView):
         x = Ad.objects.get(id=pk)
         comments = Comment.objects.filter(ad=x).order_by('-updated_at')
         comment_form = CommentForm()
+    
         context = { 'ad' : x, 'comments': comments, 'comment_form': comment_form }
 #        context = { 'ad' : x, 'price': x.price, 'comments': comments, 'comment_form': comment_form }
         return render(request, self.template_name, context)
@@ -60,11 +72,22 @@ class AdCreateView(LoginRequiredMixin, View):
             ctx = {'form': form}
             return render(request, self.template_name, ctx)
 
-        # Add owner to the model before saving
-        pic = form.save(commit=False)
-        pic.owner = self.request.user
-        pic.save()
+        # # Add owner to the model before saving
+        # pic = form.save(commit=False)
+        # pic.owner = self.request.user
+        # pic.save()
+        # return redirect(self.success_url)
+        
+        # Adjust the model owner before saving
+        inst = form.save(commit=False)
+        inst.owner = self.request.user
+        inst.save()
+        
+        # https://django-taggit.readthedocs.io/en/latest/forms.html#commit-false
+        form.save_m2m()    # Add this
+        
         return redirect(self.success_url)
+
 
 
 class AdUpdateView(LoginRequiredMixin, View):
@@ -85,9 +108,19 @@ class AdUpdateView(LoginRequiredMixin, View):
             ctx = {'form': form}
             return render(request, self.template_name, ctx)
 
-        pic = form.save(commit=False)
-        pic.save()
+        # pic = form.save(commit=False)
+        # pic.save()
 
+        # return redirect(self.success_url)
+    
+        # Adjust the model owner before saving
+        inst = form.save(commit=False)
+        inst.owner = self.request.user
+        inst.save() 
+        
+        # https://django-taggit.readthedocs.io/en/latest/forms.html#commit-false
+        form.save_m2m()  
+        
         return redirect(self.success_url)
     
     
